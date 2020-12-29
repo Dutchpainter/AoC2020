@@ -63,7 +63,7 @@ namespace Dag_01
                         Console.WriteLine($"Eerste getal: {eersteGetal} Tweede getal: {tweedeGetal} Derde getal: {derdeGetal.Single()} Som: {eersteGetal + tweedeGetal + derdeGetal.Single()} Product: {eersteGetal * tweedeGetal * derdeGetal.Single()}");
                         break;
                     }
-                    
+
                 }
             }
             Console.WriteLine("Opdracht afgerond");
