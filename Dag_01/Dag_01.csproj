@@ -5,9 +5,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-  </PropertyGroup>
   <ItemGroup>
     <None Update="Input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
