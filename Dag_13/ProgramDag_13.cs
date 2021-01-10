@@ -44,11 +44,12 @@ namespace Dag_13
                 {
                     stamp += factor;
                     modulo = stamp % busLines[i].busline;
-                    controle = (busLines[i].busline - (busLines[i].index == 0 ? busLines[i].busline : busLines[i].index));
-                    while (controle < 0)
+                    controle = busLines[i].busline - busLines[i].index;
+                    while (controle <= 0)
                     {
                         controle += busLines[i].busline;
                     }
+                    
                 }
                 while (modulo != controle);
                 factor *= busLines[i].busline;

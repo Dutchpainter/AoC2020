@@ -4,68 +4,56 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Test
+namespace Dag_18
 {
     class Program
     {
         static void Main(string[] args)
         {
-            List<Dog> dogs = new List<Dog>();
-            dogs.Add(new Dog("Fido"));
-            dogs.Add(new Dog("Bob"));
-            dogs.Add(new Dog("Adam"));
-            dogs.Sort();
-            foreach (Dog dog in dogs)
-                Console.WriteLine(dog.Describe());
-            Console.ReadKey();
+            // Inlezen bestand
+            var huiswerk = File
+                   .ReadAllLines("Inputtest.txt")
+                   .Where(s => !string.IsNullOrWhiteSpace(s))
+                   .ToList();
+            // Deel 1
+
+            var antwoorden = new List<int>();
+            
+            Console.WriteLine($"Oplossing deel 1 : Nog doen ");
         }
     }
 
-    interface IAnimal
+    public class Som
     {
-        string Describe();
-
-        string Name
+        public string Input { get; }
+        public Som(string input)
         {
-            get;
-            set;
+            // maak string zonder spaties
+            Input = input.Replace(" ", "");
         }
-    }
-
-    class Dog : IAnimal, IComparable
-    {
-        private string name;
-
-        public Dog(string name)
+        public int Berekening()
         {
-            this.Name = name;
-        }
+            int countStart = 0;
+            int countEnd = 0;
 
-        public string Describe()
-        {
-            return "Hello, I'm a dog and my name is " + this.Name;
-        }
 
-        public int CompareTo(object obj)
-        {
-            if (obj is IAnimal)
-                return this.Name.CompareTo((obj as IAnimal).Name);
+
             return 0;
         }
 
-        // of:
-        // public string Name { get; set; }
-        // dan is ook
-        // private string name;
-        // niet nodig
-
-        public string Name
+        public int Bewerking(int argument, int beginwaarde, char bewerking)
         {
-            get { return name; }
-            set { name = value; }
+            var antwoord = 0;
+            switch (bewerking)
+            {
+                case '*':
+                    antwoord = beginwaarde * argument;
+                    break;
+                case '+':
+                    antwoord = beginwaarde + argument;
+                    break;
+            }
+            return antwoord;
         }
-
     }
-
-
 }
