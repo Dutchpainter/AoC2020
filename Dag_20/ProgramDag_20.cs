@@ -10,11 +10,10 @@ namespace Dag_20
     {
         static void Main(string[] args)
         {
-            using var file = new FileStream("Inputtest.txt", FileMode.Open);
+            using var file = new FileStream("Input.txt", FileMode.Open);
             using var reader = new StreamReader(file);
             var listOfTiles = new List<Tile>();
             var regel = reader.ReadLine();
-            var gevondenWaardenZijkanten = new Dictionary<int, List<int>>();
 
             // Inlezen tiles
             while (regel != null)
@@ -29,10 +28,128 @@ namespace Dag_20
                 regel = reader.ReadLine();
             }
             Console.WriteLine("De tiles zijn ingelezen");
+            var dezePuzzel = new Puzzle(listOfTiles);
+            var oplossing1 = dezePuzzel.Hoeken.Aggregate(1L, (current, item) => current * item);
+            Console.WriteLine($"Oplossing 1: {oplossing1}");
+            Console.WriteLine();
+            //dezePuzzel.PrintAfbeelding();
+            char[,] seaMonster = new char[,]
+            {{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0'},
+             {'1', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '1', '1', '1'},
+             {'0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '0'}};
+            var deMonsters = new SeaMonsters(seaMonster);
+            var oplossing2 = dezePuzzel.TelMonsters(deMonsters);
+            var aantalMonsters = oplossing2[0];
+            var roughness = oplossing2[1];
+            Console.WriteLine($"Opdracht 2 aantal monsters: {aantalMonsters}");
+            Console.WriteLine($"Opdracht 2 roughness: {roughness}");
+            Console.WriteLine("De opdracht is klaar");
+
+
+        }
+    }
+    public class SeaMonster
+    {
+        public List<(int XValue, int YValue)> Definition { get; }
+        public int XMax { get; }
+        public int YMax { get; }
+        public SeaMonster(List<(int, int)> monster)
+        {
+            Definition = new List<(int, int)>(monster);
+            XMax = Definition.Select(m => m.XValue).Max() + 1;
+            YMax = Definition.Select(m => m.YValue).Max() + 1;
+        }
+    }
+
+    public class SeaMonsters
+    {
+        public List<SeaMonster> Monsters { get; }
+        public SeaMonsters(char[,] monster)
+        {
+            //maak verschillende monsters aan, met behulp van array
+            var maxY = monster.GetLength(1); // Kolommen
+            var maxX = monster.GetLength(0); // Rijen
+            Monsters = new List<SeaMonster> ();
+            var monster0 = new List<(int x, int y)>();
+            var monster1 = new List<(int x, int y)>();
+            var monster2 = new List<(int x, int y)>();
+            var monster3 = new List<(int x, int y)>();
+            var monster4 = new List<(int x, int y)>();
+            var monster5 = new List<(int x, int y)>();
+            var monster6 = new List<(int x, int y)>();
+            var monster7 = new List<(int x, int y)>();
+            for (var y = 0; y < maxY; y++)
+            {
+                for (var x = 0; x < maxX; x++)
+                {
+                    if( monster[x,y] == '1')
+                    {
+                        monster0.Add((x, y));
+                        monster1.Add((maxY - y - 1, x));
+                        monster2.Add((maxX - x - 1, maxY - y - 1));
+                        monster3.Add((y, maxX - x - 1));
+                        monster4.Add((y, x));
+                        monster5.Add((maxX - x - 1, y));
+                        monster6.Add((maxY - y - 1, maxX - x - 1));
+                        monster7.Add((x, maxY - y - 1));
+                    }
+                }
+            }
+            Monsters.Add(new SeaMonster(monster0));
+            Monsters.Add(new SeaMonster(monster1));
+            Monsters.Add(new SeaMonster(monster2));
+            Monsters.Add(new SeaMonster(monster3));
+            Monsters.Add(new SeaMonster(monster4));
+            Monsters.Add(new SeaMonster(monster5));
+            Monsters.Add(new SeaMonster(monster6));
+            Monsters.Add(new SeaMonster(monster7));
+
+        }
+        bool printMonster()
+        {
+            // print het monster
+            return true;
+        }
+
+    }
+    public class Puzzle
+    {
+        public char[,] AfbeeldingsArray { get; }
+        public int OnesInArray { get; }
+        public List<List<PlacedTile>> PuzzledTiles { get; }
+        public List<int> Hoeken { get; }
+        public int DimAfbeelding { get;}
+        Dictionary<int, List<int>> GevondenWaardenZijkanten { get; }
+        public List<Tile> ListOfTiles { get; }
+        public Puzzle(List<Tile> listOfTiles)
+        {
+            ListOfTiles = new List<Tile>(listOfTiles);
+            DimAfbeelding = (int)Math.Sqrt(ListOfTiles.Count);
+            GevondenWaardenZijkanten = new Dictionary<int, List<int>>(GetSideValues());
+            Hoeken = new List<int> (zoekHoeken());
+            PuzzledTiles = MaakAfbeelding();
+            AfbeeldingsArray = ConvertAfbeelding();
+            OnesInArray = countOnes();
+        }
+        int countOnes()
+        {
+            int ones = 0;
+            for (int y = 0; y < (DimAfbeelding*8); y++)
+            {
+                for (int x = 0; x < (DimAfbeelding * 8); x++)
+                {
+                    if (AfbeeldingsArray[x,y] == '1') ones++;
+                }
+            }
+            return ones;
+        }
+        List<int> zoekHoeken()
+        {
             // Uitwerking deel 1
-            gevondenWaardenZijkanten = GetSideValues(listOfTiles);
+            //var gevondenWaardenZijkanten = new Dictionary<int, List<int>>();
+            //GevondenWaardenZijkanten = GetSideValues();
             Console.WriteLine("Dictionary is gevuld");
-            var hoeken = gevondenWaardenZijkanten
+            var hoeken = GevondenWaardenZijkanten
                 .Where(x => x.Value.Count() <= 1)
                 .Select(b => b.Value[0])
                 .ToList()
@@ -40,50 +157,49 @@ namespace Dag_20
                 .Where(x => x.Count() == 4)
                 .Select(x => x.Key)
                 .ToList();
-            var oplossing1 = hoeken.Aggregate(1L, (current, item) => current * item);
-            Console.WriteLine($"Oplossing 1: {oplossing1}");
-            Console.WriteLine();
-
-            // deel 2
-            // variabelen nodig om afbeelding op te bouwen
+            return hoeken;
+        }
+        Dictionary<int, List<int>> GetSideValues()
+        {
+            var gevondenWaarden = new Dictionary<int, List<int>>();
+            foreach (Tile tile in ListOfTiles)
+            {
+                foreach (int side in tile.TileSides)
+                {
+                    if (gevondenWaarden.ContainsKey(side))
+                        gevondenWaarden[side].Add(tile.TileNumber);
+                    else
+                        gevondenWaarden.Add(side, new List<int>() { tile.TileNumber });
+                }
+            }
+            return gevondenWaarden;
+        }
+        List<List<PlacedTile>> MaakAfbeelding()
+        {
             var afbeeldingOpdracht1 = new List<List<PlacedTile>>();
-            var afbeeldingsRij = new List<PlacedTile>();
             var tilesToPlace = new Dictionary<int, Tile>();
-            foreach (Tile tile in listOfTiles) tilesToPlace.Add(tile.TileNumber, tile);
-            var dimAfbeelding = (int)Math.Sqrt(listOfTiles.Count);
-            // linkerbovenhoek kiezen
-            var gekozenHoek = hoeken[0];
-            //Console.WriteLine($"Gekozen hoek: {gekozenHoek}");
-
-
-            // orientatie gekozen hoek bepalen
-            var zijdenGekozenHoek = gevondenWaardenZijkanten
+            foreach (Tile tile in ListOfTiles) tilesToPlace.Add(tile.TileNumber, tile);
+            var gekozenHoek = Hoeken[0];
+            var zijdenGekozenHoek = GevondenWaardenZijkanten
                 .Where(x => x.Value.Count() <= 1)
                 .Select(x => new { x.Key, x.Value })
                 .Where(x => x.Value[0] == gekozenHoek)
                 .Select(x => x.Key)
                 .ToList();
-            // de orientatie is de zijde die eigenlijk boven zou moeten liggen
             Orientatie linksboven = tilesToPlace[gekozenHoek].DraaiHoek(zijdenGekozenHoek);
-            // tiles in nieuwe lijst plaatsen
-            var huidigeTile = tilesToPlace[gekozenHoek]; //1951
+            var huidigeTile = tilesToPlace[gekozenHoek]; 
             var huidigeOrientatie = linksboven;
-
-
-            // maak afbeelding
             int waardeNaarBeneden = 0;
-            for (var j = 0; j < dimAfbeelding; j++)
+            for (var j = 0; j < DimAfbeelding; j++)
             {
-                for (var i = 0; i < dimAfbeelding; i++)
+                var afbeeldingsRij = new List<PlacedTile>();
+                for (var i = 0; i < DimAfbeelding; i++)
                 {
                     var geplaatsteTile = new PlacedTile(huidigeTile, huidigeOrientatie);
-                    //Console.WriteLine($"Ronde {i} Tilenummer: {geplaatsteTile.TileNumber} {huidigeOrientatie}");
-                    //geplaatsteTile.PrintPlacedTile();
-                    //Console.WriteLine();
                     afbeeldingsRij.Add(geplaatsteTile);
                     tilesToPlace.Remove(huidigeTile.TileNumber);
                     if (i == 0) waardeNaarBeneden = geplaatsteTile.SearchDown;
-                    if (i < dimAfbeelding - 1)
+                    if (i < DimAfbeelding - 1)
                     {
                         huidigeTile = tilesToPlace[tilesToPlace.Where(x => x.Value.TileSides.Contains(geplaatsteTile.SearchRight)).Select(x => x.Value.TileNumber).ToList().First()];//tile die past
                         var error = tilesToPlace.Where(x => x.Value.TileSides.Contains(geplaatsteTile.SearchRight)).Select(x => x.Value.TileNumber).ToList().Count();//meerdere tiles
@@ -123,95 +239,78 @@ namespace Dag_20
                     }
                     else
                     {
-                        if (j < (dimAfbeelding - 1))
+                        if (j < (DimAfbeelding - 1))
                         {
                             huidigeTile = tilesToPlace[tilesToPlace.Where(x => x.Value.TileSides.Contains(waardeNaarBeneden)).Select(x => x.Value.TileNumber).ToList().First()];//tile die past
                             var toppositie = huidigeTile.TileSides.IndexOf(huidigeTile.TileSides.Where(p => p == waardeNaarBeneden).FirstOrDefault());
                             huidigeOrientatie = (Orientatie)toppositie;
                         }
                     }
-                    //Console.WriteLine();
                 }
                 afbeeldingOpdracht1.Add(afbeeldingsRij);
-                afbeeldingsRij = new List<PlacedTile>();
             }
-
-            var afbeeldingOpdracht2 = ConvertAfbeelding(afbeeldingOpdracht1);
-            //PrintAfbeelding(afbeeldingOpdracht2, dimAfbeelding*8, dimAfbeelding*8);
-            Console.WriteLine("De opdracht is klaar");
-
-            char[,] seaMonster = new char[,]
-            {{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0'},
-             {'1', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '1', '1', '1'},
-             {'0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '1', '0', '0', '0'}};
-
-            char[,] seaMonster2 = new char[,]
-            {{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '1', ' '},
-             {'1', ' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' ', '1', '1', '1'},
-             {' ', '1', ' ', ' ', '1', ' ', ' ', '1', ' ', ' ', '1', ' ', ' ', '1', ' ', ' ', '1', ' ', ' ', ' '}};
-            PrintAfbeelding(seaMonster2, 20, 3);
-
-
-
-
-
-            char[,] ConvertAfbeelding(List<List<PlacedTile>> afbeelding)
+            return afbeeldingOpdracht1;
+        }
+        char[,] ConvertAfbeelding()
+        {
+            char[,] convertedAfbeelding = new char[8 * DimAfbeelding, 8 * DimAfbeelding];
+            for (var y = 0; y < DimAfbeelding; y++)
             {
-                // Nieuwe afbeelding met buitenste waardes eruit maken om deel 2 te berekenen
-                char[,] convertedAfbeelding = new char[8 * (int)dimAfbeelding, 8 * (int)dimAfbeelding];
-                for (var y = 0; y < dimAfbeelding; y++)
+                for (var x = 0; x < DimAfbeelding; x++)
                 {
-                    for (var x = 0; x < dimAfbeelding; x++)
+                    for (var y2 = 0; y2 < 8; y2++)
                     {
-                        // zet waarde uit Afbeelding in afbeeldingOpdracht2
-                        for (var y2 = 0; y2 < 8; y2++)
+                        for (var x2 = 0; x2 < 8; x2++)
                         {
-                            for (var x2 = 0; x2 < 8; x2++)
-                            {
-                                convertedAfbeelding[x2 + x * 8, y2 + y * 8] = afbeelding[y][x].PlacedTileLayout[x2 + 1, y2 + 1];
-                            }
+                            convertedAfbeelding[x2 + x * 8, y2 + y * 8] = PuzzledTiles[y][x].PlacedTileLayout[x2 + 1, y2 + 1];
                         }
                     }
                 }
-                return convertedAfbeelding;
             }
-
-            bool PrintAfbeelding(char[,] afbeelding, int dimX, int dimY)
+            return convertedAfbeelding;
+        }
+        public bool PrintAfbeelding()
+        {
+            for (var y = 0; y < DimAfbeelding*8; y++)
             {
-                for (var y = 0; y < dimY; y++)
+                for (var x = 0; x < DimAfbeelding*8; x++)
                 {
-                    for (var x = 0; x < dimX; x++)
-                    {
-                        Console.Write(afbeelding[y, x]);
-                    }
-                    Console.WriteLine();
+                    Console.Write(AfbeeldingsArray[y, x]);
                 }
                 Console.WriteLine();
-                return true;
             }
-            Dictionary<int, List<int>> GetSideValues(List<Tile> tiles)
+            Console.WriteLine();
+            return true;
+        }
+        public List<int> TelMonsters(SeaMonsters seaMonsters)
+        {
+            var max = DimAfbeelding * 8;
+            var oplossing2 = new List<int>();
+            foreach (SeaMonster monster in seaMonsters.Monsters)
             {
-                var gevondenWaarden = new Dictionary<int, List<int>>();
-                foreach (Tile tile in tiles)
+                var aantalMonsters = 0;
+                for (var y = 0; y < (max - monster.YMax); y++)
                 {
-                    foreach (int side in tile.TileSides)
+                    for (var x = 0; x < (max - monster.XMax); x++)
                     {
-                        if (gevondenWaarden.ContainsKey(side))
-                            gevondenWaarden[side].Add(tile.TileNumber);
-                        else
-                            gevondenWaarden.Add(side, new List<int>() { tile.TileNumber });
+                        var aantalPunten = 0;
+                        foreach (var point in monster.Definition)
+                        {
+                            if (AfbeeldingsArray[x + point.XValue, y + point.YValue] == '1') aantalPunten++;
+                        }
+                        if (aantalPunten == 15) aantalMonsters++;
                     }
                 }
-                return gevondenWaarden;
+                if (aantalMonsters > 0)
+                {
+                    oplossing2.Add(aantalMonsters);
+                    oplossing2.Add(OnesInArray - aantalMonsters * 15);
+                } 
             }
+            return oplossing2;
         }
     }
 
-
-    public class Puzzle
-    {
-
-    }
     public class PlacedTile
     {
         public int TileNumber { get; }
@@ -221,7 +320,7 @@ namespace Dag_20
         public PlacedTile(Tile tile, Orientatie orientatie)
         {
             TileNumber = tile.TileNumber;
-            char[,] placedTileLayout = new char[10, 10];
+            char[,]  placedTileLayout = new char[10,10];
             int searchDown;
             int searchRight;
             switch (orientatie)
@@ -260,22 +359,22 @@ namespace Dag_20
                     searchDown = tile.TopReverse;
                     break;
                 case Orientatie.Left:
-                    for (var y = 0; y < 10; y++)
+                    for (var y = 0; y<10; y++)
                     {
-                        for (var x = 0; x < 10; x++)
+                        for (var x = 0; x<10; x++)
                         {
-                            placedTileLayout[x, y] = tile.TileLayout[9 - x][y];
+                            placedTileLayout[x,y] = tile.TileLayout[9-x][y];
                         }
                     }
                     searchRight = tile.TopReverse;
                     searchDown = tile.RightReverse;
-                    break;
+                    break;      
                 case Orientatie.TopReverse:
                     for (var y = 0; y < 10; y++)
                     {
                         for (var x = 0; x < 10; x++)
                         {
-                            placedTileLayout[x, y] = tile.TileLayout[y][9 - x];
+                            placedTileLayout[x, y] = tile.TileLayout[y][9-x];
                         }
                     }
                     searchRight = tile.Left;
@@ -329,15 +428,15 @@ namespace Dag_20
         {
             for (var y = 0; y < 10; y++)
             {
-                for (var x = 0; x < 10; x++)
+                for (var x = 0; x< 10; x++)
                 {
-                    Console.Write($"{PlacedTileLayout[x, y]}");
+                    Console.Write($"{PlacedTileLayout[x,y]}");
                 }
                 Console.WriteLine();
             }
             return true;
         }
-    }
+    } 
 
     public class Tile
     {
@@ -379,9 +478,9 @@ namespace Dag_20
                 }
                 TileLayout.Add(row);
                 if (i == 1)
-                {
+                { 
                     Top = Convert.ToInt32(row, 2);
-                    TopReverse = Convert.ToInt32(rowReverse, 2);
+                    TopReverse = Convert.ToInt32(rowReverse,2);
                 }
                 if (i == 10)
                 {
@@ -413,13 +512,13 @@ namespace Dag_20
         }
         public bool PrintTile()
         {
-            for (var i = 0; i < TileLayout.Count; i++)
+           for (var i = 0; i < TileLayout.Count; i++)
             {
                 Console.WriteLine(TileLayout[i]);
             }
             return true;
         }
-        public Orientatie DraaiHoek(List<int> zijden)
+        public Orientatie DraaiHoek(List <int> zijden)
         {
             Orientatie bovenkant = Orientatie.Top;
             if (zijden.IndexOf(Top) != -1 && zijden.IndexOf(Right) != -1) bovenkant = Orientatie.Right;
