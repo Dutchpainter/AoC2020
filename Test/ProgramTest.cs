@@ -4,15 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Dag_22
+namespace Test
 {
     class Program
     {
         static void Main(string[] args)
         {
-            using var file = new FileStream("Input.txt", FileMode.Open);
-            using var reader = new StreamReader(file);
-            var regel = reader.ReadLine();
+            var allTiles = File
+                  .ReadAllLines("Inputtest.txt")
+                  .Where(s => !string.IsNullOrWhiteSpace(s))
+                  .ToList();
+            
+            Console.WriteLine("De opdracht is klaar");
+
         }
     }
+   
 }
